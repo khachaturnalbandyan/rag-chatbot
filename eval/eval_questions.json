@@ -1,0 +1,42 @@
+[
+  {
+    "question": "What are the two core modules of the HCFR strategy?",
+    "expected_keywords": ["CAA", "HFE"]
+  },
+  {
+    "question": "What pretrained model is used to obtain text embeddings?",
+    "expected_keywords": ["RoBERTa"]
+  },
+  {
+    "question": "What is used to extract audio embeddings for semantic context?",
+    "expected_keywords": ["Wav2Vec2"]
+  },
+  {
+    "question": "What two datasets are used to evaluate the model?",
+    "expected_keywords": ["IEMOCAP", "MELD"]
+  },
+  {
+    "question": "What is the WA and WF1 achieved on the MELD dataset?",
+    "expected_keywords": ["64.76", "63.02"]
+  },
+  {
+    "question": "What happens to performance when the CMDF module is removed?",
+    "expected_keywords": ["CMDF", "drop"]
+  },
+  {
+    "question": "What optimizer and learning rate are used for training?",
+    "expected_keywords": ["Adam", "3e-3"]
+  },
+  {
+    "question": "Which emotion classes are the rarest in the MELD dataset?",
+    "expected_keywords": ["Fear", "Disgust"]
+  },
+  {
+    "question": "What loss function combines cross-entropy with a contrastive term?",
+    "expected_keywords": ["CLC", "cross-entropy"]
+  },
+  {
+    "question": "What toolkit is used to extract MFCC features?",
+    "expected_keywords": ["librosa"]
+  }
+]

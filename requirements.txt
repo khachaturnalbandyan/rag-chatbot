@@ -1,0 +1,21 @@
+# Core pipeline
+numpy>=1.24
+sentence-transformers>=2.7
+pypdf>=4.0
+python-dotenv>=1.0
+
+# LLM backends - install whichever you'll actually use.
+# Hosted APIs (recommended - better answers, no local GPU/download needed):
+anthropic>=0.34
+openai>=1.40
+
+# Local/offline fallback backend (--backend local), only needed if you
+# don't want to use a hosted API:
+torch>=2.1
+transformers>=4.40
+
+# Web UI (optional - only needed for app_streamlit.py)
+streamlit>=1.35
+
+# Tests
+pytest>=8.0

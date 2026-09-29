@@ -1,0 +1,217 @@
+HRDF-MER: Hierarchical feature refinement and cascaded dynamic fusion for multimodal emotion recognition
+Jianjun Lei, Zhenmei Mu, Ying Wang
+Chongqing University of Posts and Telecommunications
+Published in Computer Speech & Language, 2026
+
+ABSTRACT
+Multimodal Emotion Recognition (MER) is challenged by modality misalignment, shallow temporal cue
+modeling, and inefficient fusion. This paper proposes HRDF-MER, a framework that integrates hierarchical
+refinement and cascaded dynamic fusion for more robust emotion recognition. To improve cross-modal
+alignment and unimodal representation, HRDF-MER introduces a novel Hierarchical Cross-modal Feature
+Refinement (HCFR) strategy, which integrates Cross-modal Adaptive Alignment (CAA) and Hierarchical
+Feature Enhancement (HFE). The CAA module employs multi-head cross-attention to construct hierarchical
+correlation matrices for precise acoustic-text alignment, and the HFE employs a Transformer with cross-modal
+residual connections to further enhance unimodal representations for robust feature learning. We further
+propose a Cascaded Multimodal Dynamic Fusion (CMDF) strategy, where a cross-attention encoder captures
+fine-grained inter-modal dependencies and a gated fusion unit adaptively weights modalities to progressively
+produce highly discriminative multimodal representations. Moreover, a multi-objective training scheme is
+proposed to jointly optimize feature alignment and classification by integrating Cross-modal Label Contrastive
+Loss (CLC Loss) with cross-entropy loss. Extensive experiments on the IEMOCAP and MELD datasets
+demonstrate that HRDF-MER significantly outperforms state-of-the-art models, while ablation studies further
+confirm the effectiveness and necessity of each proposed component.
+
+1. INTRODUCTION
+Emotion recognition is fundamental for human-computer interaction, as it enables nuanced communication,
+affective understanding, and adaptive responses in complex social systems. Although unimodal approaches,
+particularly those based on speech, have achieved significant progress, they remain vulnerable to environmental
+noise, individual variability in expression, and contextual ambiguities, which can substantially degrade
+performance. To address these limitations, Multimodal Emotion Recognition (MER) has emerged as a
+promising paradigm, leveraging complementary information from multiple modalities, such as audio, text, and
+vision, to achieve more accurate, robust, and context-aware affective analysis.
+
+However, developing effective MER systems remains challenging due to the inherent heterogeneity of
+modalities, as acoustic and textual data exhibit significant differences in temporal resolution, feature
+representation, and semantic abstraction. Existing methods often rely on simple alignment mechanisms, such
+as single-layer attention, which fail to model hierarchical emotional cues spanning low-level prosody to
+high-level semantics. In addition, most fusion strategies adopt static or manually designed weighting schemes,
+lacking the capacity to dynamically adjust modality contributions according to context-specific discriminative
+capacity.
+
+This paper proposes the HRDF-MER framework, which integrates hierarchical feature refinement with
+cascaded dynamic fusion. The framework addresses three critical aspects: cross-modal alignment, intra-modal
+representation learning, and multimodal fusion. Key contributions:
+- The HCFR strategy integrates two core modules: (1) the CAA module, which utilizes multi-head
+  cross-attention to establish hierarchical cross-modal alignment; and (2) the HFE module, which employs
+  cross-layer residuals to mitigate intra-modal noise, suppress feature redundancy, and strengthen unimodal
+  discriminability.
+- A cascaded multimodal fusion module CMDF, which employs iterative cross-attention and a gating-based
+  adaptive mechanism, resolving complex inter-modal dependency modeling and progressively integrating
+  multi-level emotional information to produce robust and highly discriminative multimodal representations.
+- A multi-objective hierarchical training framework, jointly optimizing CLC loss and cross-entropy losses.
+- Extensive evaluations on the IEMOCAP and MELD benchmarks demonstrate that HRDF-MER achieves
+  significant performance gains over strong baselines, while ablation studies further validate the individual
+  and collective contributions of each component.
+
+Against the rapid advancement of Large Language Models (LLMs) and multimodal large models (e.g.,
+GPT-4V, LLaVA), leveraging large models for emotion recognition has become a prominent research direction.
+These methods capitalize on large models' robust semantic comprehension and context modeling capabilities.
+However, large model-based approaches have notable limitations: they incur heavy computational overhead,
+hindering deployment in resource-constrained scenarios; additionally, their internal feature representations and
+decision-making processes lack interpretability.
+
+3. METHOD
+3.1 Overview
+The proposed HRDF-MER framework consists of five core components: embedding, refinement, fusion,
+classification, and multi-objective optimization. (1) The embedding layer extracts initial speech and text
+features via pre-trained encoders; (2) the feature refinement module aligns modalities through cross-modal
+contrastive learning and enhances emotion-relevant features; (3) the feature fusion module employs a
+two-layer Transformer to integrate the refined features into a unified multimodal representation; (4) the
+classifier compresses fused features with max pooling and predicts emotion categories through a multi-layer
+feedforward network; and (5) the multi-objective optimization jointly leverages cross-modal label contrastive
+loss and inter-modal distance constraints.
+
+3.2 Hierarchical Cross-modal Feature Refinement (HCFR)
+The HCFR module consists of two cooperatively optimized components: CAA and HFE. The CAA module
+establishes fine-grained inter-modal mappings to bridge distribution gaps, while the HFE module strengthens
+intra-modal representations based on the aligned features.
+
+3.2.1 Cross-modal Adaptive Alignment (CAA)
+The CAA module employs a parallel modal encoder architecture to capture complementary emotional
+representations from speech and text. For the text modality, the pre-trained RoBERTa-base model is used to
+obtain embeddings X_e_t of dimension 768. For the audio modality, dual features are leveraged: pre-trained
+Wav2Vec2-base embeddings X_e_a for semantic context, and Long Short-Term Memory (LSTM) processed
+MFCC features X_e_m for acoustic details, where the MFCC features are extracted using the librosa toolkit.
+
+A Multi-Head Cross-Attention (MHCA) layer establishes fine-grained associations among X_e_a, X_e_m, and
+X_e_t. The audio representation X_e_a is used as the query, text as key and value; the output of the MHCA is
+added to X_e_a followed by layer normalization to produce the aligned acoustic representation. This whole
+procedure is called the Cross-modal Attention Encoder (CAE). The same procedure is applied for MFCC
+features. This CAA module employs a two-stage refined alignment architecture to progressively integrate the
+two speech modalities with the text modality.
+
+3.2.2 Hierarchical Feature Enhancement (HFE)
+The HFE framework progressively enhances feature learning through multi-stage interactions using parallel
+multi-head Self-Attention Encoders (SAEs) applied independently to text, aligned audio, and aligned MFCC
+features. Because self-attention alone is insufficient for capturing high-level emotional semantics, an
+intra-modal cross-attention mechanism is introduced that integrates information from different hierarchical
+layers within the same modality: current-layer features serve as queries and lower-layer features as key-value
+pairs. This cross-layer interaction injects high-level semantic constraints while retaining original information,
+suppressing noise and enhancing discriminative capacity.
+
+3.3 Cascaded Multimodal Dynamic Fusion (CMDF)
+The CMDF module is a progressive cross-modal interaction architecture that employs a hierarchical attention
+mechanism to integrate semantic-acoustic features. CMDF adopts three parallel Cross-modal Attention
+Encoders (CAEs) that generate refined cross-modal interaction representations, alternately using text and
+{audio, MFCC} features as queries. Stacking two CAE layers is empirically validated to effectively enhance
+hierarchical cross-modal feature fusion: using fewer layers (0 or 1) leads to insufficient cross-modal
+interaction and reduced accuracy, while increasing to three layers causes a slight performance degradation
+due to information redundancy or over-smoothing.
+
+Because MFCC features are more sensitive to timbre while audio (Wav2Vec2) features preserve richer
+prosodic and rhythmic information, a cross-attention mechanism enables mutual reinforcement and calibration
+between the two acoustic features. Meanwhile, a self-attention mechanism is applied to the text modality to
+mitigate interference from redundant acoustic information and refocus on the text's intrinsic semantic
+structure. Ablation shows that replacing this self-attention step with cross-attention, or removing it entirely,
+causes a 1.5-2.0% performance drop in overall accuracy.
+
+A gating-based fusion mechanism adaptively selects and integrates the most informative components from
+each modality. A learnable gating unit generates adaptive weights (via a sigmoid) to determine the importance
+of enhanced vs. cross-modal features, and the gated fusion combines them via element-wise weighting. This
+gating is applied in two stages to further refine feature selectivity and suppress residual noise. The refined
+features from all modalities (text, audio, MFCC) are concatenated into the final fused emotional representation.
+
+3.4 Multi-objective Learning
+The training objective combines standard Cross-Entropy (CE) loss with a multi-layer Cross-modal Label
+Contrastive (CLC) loss: L = delta * L_CE + lambda * sum_{l=1..3} L_CLC^(l), where delta and lambda balance
+the contributions. The CLC loss is computed at three hierarchical stages: (1) after the feature embedding
+layer, (2) after the CAA module, and (3) after the HFE module, enforcing stage-wise cross-modal semantic
+consistency.
+
+The CLC loss uses learnable multi-perspective pooling: for each modality, K learnable masks aggregate the
+sequence into K representation vectors, which are projected, normalized, and concatenated into a global
+representation per modality. Cross-modal similarity is computed between these global representations (e.g.,
+audio-to-text) via a temperature-scaled dot product, and a label-aware InfoNCE-style contrastive loss is
+applied: samples sharing the same emotion label are treated as positive pairs. The bidirectional losses (e.g.,
+text-to-audio and audio-to-text) are averaged for symmetric alignment, and the per-stage CLC losses are
+averaged across modality pairs.
+
+4. EXPERIMENTS
+4.1 Datasets
+IEMOCAP: approximately 12 hours of dyadic conversations from 10 professional actors across 5 sessions.
+Four basic emotions are considered: Neutral, Anger, Happy (including Excited), and Sad, resulting in 5531
+valid utterances.
+
+MELD: derived from the TV series "Friends", contains over 13,000 utterances from multi-party conversations,
+covering seven basic emotions (Anger, Disgust, Sadness, Happiness, Surprise, Fear) plus Neutral. MELD is
+officially partitioned into training (9989 utterances), validation (1109 utterances), and test (2610 utterances)
+sets. The dataset is heavily class-imbalanced: Neutral dominates with 6435 of 13,707 total utterances, while
+Fear (358) and Disgust (361) are the rarest classes.
+
+4.1.3 Training details
+HRDF-MER is implemented in PyTorch and trained on an Nvidia Tesla V100 GPU. Zero-padding is applied
+within each batch, aligning sequences to the longest in that batch. The Adam optimizer uses an initial learning
+rate of 3e-3. The model trains for 50 epochs with batch size 12, using gradient accumulation with step size 4
+(effective batch of ~48). The model contains approximately 250 million trainable parameters. The
+hyperparameters delta and lambda are fixed at 0.5 and 0.2 respectively, found via preliminary experiments to be
+optimal. For IEMOCAP, a leave-one-session-out 5-fold cross-validation strategy ensures speaker independence.
+
+4.1.4 Evaluation metrics
+For IEMOCAP: Unweighted Accuracy (UA) and Weighted Accuracy (WA). For MELD: Weighted Accuracy
+(WA) and Weighted F1-score (WF1), following the official train/val/test split. An Average (Avg) score over
+the metrics is also computed.
+
+4.2 Results
+On IEMOCAP, HRDF-MER achieves UA=78.64%, WA=77.66%, Avg=78.15%, outperforming baselines such
+as MSMSER, KBCoAtt, SAMS, REA, SWG-MMIN, MSER, MPLMM, HBF-MRC, and MFGCN.
+
+On MELD, HRDF-MER achieves WA=64.76% and WF1=63.02% (Avg=63.89%), exceeding baselines including
+DSAGCN (WA=60.9, WF1=58.7), HI-IMC (WA=61.7, WF1=60.8), SACCMA (WF1=59.3), GCCL (WA=62.82,
+WF1=60.28), REA (WF1=61.7), and MSE-Qwen-1.8B, a large-language-model-based fusion approach
+(WA=62.34, WF1=59.89). HRDF-MER's 2.42% WA improvement over MSE-Qwen-1.8B is attributed to the
+CMDF module's dynamic adaptability compared to MSE-Qwen-1.8B's single-layer large-model fusion.
+
+4.3 Ablation studies
+Unimodal results on IEMOCAP: text alone achieves the highest average accuracy (68.92%), significantly
+outperforming audio alone (63.74%) and MFCC alone (60.40%), indicating text is the dominant modality.
+Combining audio and MFCC reaches 66.92% average. Concatenating all three modalities (text, audio, MFCC)
+without the proposed refinement/fusion modules reaches 75.21% average.
+
+Removing CMDF causes the largest performance drop (Avg 76.42%, down from 78.15%), confirming CMDF's
+critical role in dynamic weighting and integration of aligned features. Removing HFE causes a 0.65% drop, and
+removing CAA causes a 0.42% drop, confirming the necessity of multi-scale feature learning and precise
+temporal alignment respectively.
+
+For the three-stage CLC loss, single-stage utilization yields limited improvement, while combining multiple
+contrastive losses steadily enhances performance; using all three stages together yields the largest performance
+leap.
+
+4.4 Hyperparameter study
+The optimal combination is delta=0.5, lambda=0.2, achieving WA=78.64% and UA=77.66% on IEMOCAP.
+Extreme values (delta=1.0, lambda=0.0, i.e. CE loss only; or delta=0.0, lambda=1.0, i.e. CLC loss only) both
+perform worse, showing the two loss terms are complementary.
+
+4.5 Visualization and case study
+t-SNE visualization shows that removing CMDF results in highly dispersed feature distributions and blurred
+class boundaries, while retaining CMDF leads to tighter clustering of same-class features. Removing HCFR
+results in more dispersed distributions especially for neutral emotions.
+
+Confusion matrix analysis: on IEMOCAP, HRDF-MER achieves high recall for Anger (0.869) and Sad (0.838);
+the main confusion is between Happy/Excited and Neutral. On MELD, due to severe class imbalance, minority
+emotions (Fear, Sadness, Disgust) are prone to misclassification, with the model tending to over-predict the
+majority Neutral class; for example, Fear is misclassified as Disgust 26.4% of the time. Joy is often confused
+with Neutral (21.9%) and Surprise (10.5%).
+
+A case study shows that a model with only HCFR misclassifies a sample as "Neutral" with confidence 0.6136,
+relying excessively on textual features while ignoring audio cues. The full model with both HCFR and CMDF
+correctly identifies the sample as "Sad" with improved confidence 0.7325, demonstrating CMDF's role in
+dynamically adjusting modal fusion weights based on input features.
+
+5. CONCLUSION
+HRDF-MER is a hierarchical framework tackling modality misalignment, shallow temporal cue modeling, and
+inefficient fusion in multimodal emotion recognition. The HCFR module combines CAA and HFE to achieve
+precise cross-modal alignment and progressively refine unimodal representations. The CMDF strategy captures
+fine-grained inter-modal dependencies via cross-attention and adaptive gating. A multi-objective training
+scheme ensures robust joint optimization of feature alignment and classification. Despite these strengths, audio
+data remain sensitive to environmental noise, and minority or semantically close emotions remain challenging
+to recognize accurately. Future work will focus on robustness in noisy environments, integrating visual
+modality information, and exploring advanced alignment and fusion techniques.
